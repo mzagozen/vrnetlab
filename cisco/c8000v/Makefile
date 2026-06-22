@@ -24,10 +24,14 @@ docker-build: docker-build-common
 		docker rm -f $$(cat cidfile); \
 		rm -f cidfile; \
 	else \
-		echo "Skipping install step for controller mode (serial-enabled image)"; \
+		echo "Skipping install step for $(MODE) mode (pristine image)"; \
 	fi
 
-# Override default to build both autonomous and controller mode variants
+# Override default docker-image recipe to build the autonomous, controller and
+# ztp mode variants.
+# The controller and ztp modes both skip the install step, so they stay pristine
+# (empty startup-config). The images are actually equivalent, save for the MODE
+# ENV var committed in the last layer.
 docker-image:
 	for IMAGE in $(IMAGES); do \
 		echo "Building autonomous mode variant for $$IMAGE"; \
@@ -36,6 +40,10 @@ docker-image:
 		echo "Building controller mode variant for $$IMAGE"; \
 		VER=$$($(MAKE) -s IMAGE=$$IMAGE print-version); \
 		$(MAKE) IMAGE=$$IMAGE VERSION=controller-$$VER MODE=controller docker-build; \
+		$(MAKE) IMAGE=$$IMAGE docker-clean-build; \
+		echo "Building ztp mode variant for $$IMAGE"; \
+		VER=$$($(MAKE) -s IMAGE=$$IMAGE print-version); \
+		$(MAKE) IMAGE=$$IMAGE VERSION=ztp-$$VER MODE=ztp docker-build; \
 		$(MAKE) IMAGE=$$IMAGE docker-clean-build; \
 	done
 
