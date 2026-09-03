@@ -61,6 +61,7 @@ class C8000v_vm(vrnetlab.VM):
         self.num_nics = 9
         self.nic_type = "vmxnet3"
         self.image_name = "config.iso"
+        self.supports_mgmtless = True
         self.mode = os.environ.get("MODE", "autonomous")
         # ZTP mode fallback: idle time after which we mark the node up if no
         # DHCP lease / interactive prompt was seen first (see bootstrap_spin).
